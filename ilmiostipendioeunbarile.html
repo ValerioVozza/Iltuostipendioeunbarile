@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Il barile dei soldi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--paper:#fbfcfe;--grid:#dfe9f6;--card:#ffffff;--ink:#1d2b5c;--mut:#56627f;--line:#c6d3e8;--margin:#ee8a8a;--red:#d6322b;--gold:#f2b705;--goldd:#9a6f00;--ok:#2b8a3e;--empty:#e8eef7;--field:#f3f6fb;
+--fh:"Baloo 2",ui-rounded,"Arial Rounded MT Bold","Trebuchet MS",sans-serif;--fb:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#1c2a24;--grid:rgba(255,255,255,.045);--card:#23342c;--ink:#f1efe4;--mut:#b3bcad;--line:#3a4e44;--margin:#a14d4d;--red:#ff6b61;--ok:#69db7c;--empty:#2d4037;--field:#1c2a24}}
+:root[data-theme="dark"]{--paper:#1c2a24;--grid:rgba(255,255,255,.045);--card:#23342c;--ink:#f1efe4;--mut:#b3bcad;--line:#3a4e44;--margin:#a14d4d;--red:#ff6b61;--ok:#69db7c;--empty:#2d4037;--field:#1c2a24}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background-color:var(--paper);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:22px 22px;color:var(--ink);font-family:var(--fb);font-size:17px;line-height:1.5}
+.wrap{max-width:1100px;margin:0 auto;padding:0 18px 48px}
+.clock{position:sticky;top:env(safe-area-inset-top,0px);z-index:4;margin:0 -18px;padding:10px 18px;background:var(--paper);border-bottom:3px solid var(--ink);display:flex;align-items:center;gap:8px 18px;flex-wrap:wrap}
+.clock .when{font-family:var(--fh);font-size:1.5rem;font-weight:800;line-height:1;text-transform:capitalize}
+.clock .capv{font-size:.95rem;color:var(--mut)}
+.clock .capv b{color:var(--ink);font-family:var(--fh);font-size:1.2rem}
+.clock .capv b.neg{color:var(--red)}
+.next{margin-left:auto;border:none;background:var(--ink);color:var(--paper);border-radius:12px;padding:10px 18px;font-family:var(--fh);font-size:1.15rem;font-weight:800;box-shadow:0 4px 0 var(--gold)}
+.next:active{transform:translateY(2px);box-shadow:0 2px 0 var(--gold)}
+.diary{list-style:none;padding:0;margin:6px 0 0;font-size:.9rem}
+.diary li{display:flex;justify-content:space-between;gap:8px;padding:4px 0;border-bottom:1px dotted var(--line)}
+.diary li:last-child{border-bottom:none}
+.diary .pos{color:var(--ok);font-weight:700;white-space:nowrap}
+.diary .neg{color:var(--red);font-weight:700;white-space:nowrap}
+h1,h2,h3{font-family:var(--fh);line-height:1.1;margin:0}
+h1{font-size:clamp(2.3rem,7vw,3.8rem);font-weight:800;display:inline;background:linear-gradient(transparent 60%,rgba(242,183,5,.55) 60%,rgba(242,183,5,.55) 92%,transparent 92%);padding:0 .1em}
+h2{font-size:1.4rem;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+header{padding:32px 0 6px}
+.intro{max-width:62ch;margin:14px 0 0;color:var(--mut)}
+.hint{color:var(--mut);font-size:.92rem;margin:0 0 6px;max-width:60ch}
+.scen{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0 24px}
+.sc{border:2px solid var(--ink);background:var(--card);color:var(--ink);border-radius:12px;padding:10px 16px;text-align:left;font:inherit;font-weight:700;cursor:pointer}
+.sc small{display:block;font-weight:400;font-size:.82rem;opacity:.85}
+.sc[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.main{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:22px;align-items:start}
+.side{position:sticky;top:calc(env(safe-area-inset-top,0px) + 84px)}
+@media(max-width:860px){.main{grid-template-columns:1fr}.side{position:static;order:-1}}
+.sheet{position:relative;background:var(--card);border:1px solid var(--line);border-radius:4px;padding:18px 18px 20px 36px;margin-bottom:18px}
+.sheet::before{content:"";position:absolute;left:20px;top:0;bottom:0;width:2px;background:var(--margin)}
+.board{background:var(--card);border:3px solid var(--ink);border-radius:18px;padding:16px}
+label{font-size:.85rem;color:var(--mut);display:block}
+input[type=number],input[type=text],select{width:100%;padding:9px 10px;border:1.5px solid var(--line);border-radius:8px;background:var(--field);color:var(--ink);font:inherit;font-size:1rem}
+label>input,label>select{margin-top:4px}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.top3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:10px}
+@media(max-width:600px){.top3{grid-template-columns:1fr}}
+.row{display:grid;grid-template-columns:34px minmax(0,1fr) auto 90px 34px;gap:8px;align-items:center;margin-top:8px}
+@media(max-width:480px){.row{grid-template-columns:34px minmax(0,1fr) 90px 34px}.row .nm{grid-column:2/4}.row .del{grid-column:4;grid-row:1}.row .kind{grid-column:2;grid-row:2;justify-self:start}.row .am{grid-column:3;grid-row:2}}
+input[type=color]{width:34px;height:34px;padding:0;border:2px solid var(--line);border-radius:50%;overflow:hidden;background:none;cursor:pointer}
+input[type=color]::-webkit-color-swatch-wrapper{padding:0}
+input[type=color]::-webkit-color-swatch{border:none;border-radius:50%}
+input[type=color]::-moz-color-swatch{border:none;border-radius:50%}
+button{font:inherit;color:inherit;cursor:pointer}
+.del{width:34px;height:34px;border:1.5px solid var(--line);background:transparent;border-radius:8px;padding:0}
+.kind{font-size:.8rem;font-weight:700;padding:5px 11px;border-radius:999px;border:2px solid var(--ink);white-space:nowrap}
+.kind[data-k="b"]{background:var(--ink);color:var(--paper)}
+.kind[data-k="d"]{background:repeating-linear-gradient(45deg,transparent 0 5px,rgba(242,183,5,.4) 5px 9px);border-style:dashed;color:var(--ink)}
+.add{margin-top:12px;border:2px dashed var(--ink);background:transparent;border-radius:10px;padding:9px 14px;font-weight:700;width:100%}
+.empty{color:var(--mut);font-style:italic;margin:8px 0 0}
+.sub{border:2px dashed var(--line);border-radius:10px;padding:10px;margin-top:10px}
+.subhead{display:grid;grid-template-columns:34px minmax(0,1fr) 34px;gap:8px;align-items:center}
+.f3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+@media(max-width:560px){.f3{grid-template-columns:1fr}}
+.calc{font-size:.9rem;color:var(--mut);margin:8px 0 0}
+.calc b{color:var(--ink)}
+.q{width:24px;height:24px;border-radius:50%;border:2px solid currentColor;background:transparent;font-weight:700;font-size:.8rem;line-height:1;padding:0;flex:none;font-family:var(--fb)}
+svg.barrel{width:100%;max-width:250px;display:block;margin:0 auto}
+.lineLbl{font:700 11px var(--fb);fill:var(--red);paint-order:stroke;stroke:var(--card);stroke-width:3px}
+.status{font-family:var(--fh);font-size:1.35rem;font-weight:700;text-align:center;margin:6px 0 2px}
+.status.neg{color:var(--red)}
+.legend{list-style:none;margin:10px 0 0;padding:0;font-size:.9rem}
+.legend li{display:flex;justify-content:space-between;gap:8px;padding:4px 0;border-bottom:1px dotted var(--line)}
+.legend li:last-child{border-bottom:none}
+.dot{width:12px;height:12px;border-radius:3px;display:inline-block;margin-right:7px;vertical-align:-1px;border:1px solid rgba(0,0,0,.15)}
+.dot.h{background-image:repeating-linear-gradient(45deg,transparent 0 3px,rgba(255,255,255,.6) 3px 5px)}
+.tag{font-size:.72rem;color:var(--mut);margin-left:4px}
+.split{display:flex;height:16px;border-radius:8px;overflow:hidden;border:2px solid var(--ink);margin-top:14px;background:var(--empty)}
+.split span{display:block;height:100%}
+.splitcap{font-size:.8rem;color:var(--mut);margin:6px 0 0}
+.go{width:100%;padding:16px;font-family:var(--fh);font-size:1.3rem;font-weight:800;background:var(--gold);color:#2a1d00;border:none;border-radius:14px;box-shadow:0 5px 0 var(--goldd);margin-top:14px}
+.go:active{transform:translateY(3px);box-shadow:0 2px 0 var(--goldd)}
+.opts{display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:12px;align-items:center}
+.sw{display:flex;align-items:center;gap:8px;font-size:.95rem;color:var(--ink);cursor:pointer}
+.sw input{appearance:none;-webkit-appearance:none;width:42px;height:24px;border-radius:999px;background:var(--line);position:relative;cursor:pointer;margin:0;transition:background .15s}
+.sw input::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .15s}
+.sw input:checked{background:var(--ok)}
+.sw input:checked::after{transform:translateX(18px)}
+input[type=range]{width:100%;accent-color:var(--gold)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-top:14px}
+.stat{border:2px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--card)}
+.stat span{display:block;font-size:.8rem;color:var(--mut)}
+.stat b{font-family:var(--fh);font-size:1.25rem;font-weight:700}
+.stat.neg b{color:var(--red)}
+.barskey{display:flex;gap:16px;flex-wrap:wrap;font-size:.85rem;color:var(--mut);margin-top:14px}
+.bars{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;min-height:20px}
+.bars i,.barskey i{width:28px;height:15px;display:inline-block;background:linear-gradient(180deg,#fff3a8,#f5c518 45%,#b8860b);border:1px solid #8a6508;border-radius:3px 3px 1px 1px;clip-path:polygon(12% 0,88% 0,100% 100%,0 100%)}
+.barskey i{width:22px;height:12px;vertical-align:-1px;margin-right:4px}
+.bars i.s,.barskey i.s{background:linear-gradient(180deg,#fff,#c9ced6 45%,#7b828c);border-color:#5f6670}
+.more{font-size:.85rem;color:var(--mut);margin:6px 0 0}
+.pop{animation:pop .35s ease-out}
+@keyframes pop{from{transform:translateY(-12px) scale(1.5);opacity:0}to{transform:none;opacity:1}}
+.log{list-style:none;padding:0;margin:12px 0 0;font-size:.92rem}
+.log li{display:flex;gap:8px;padding:5px 0}
+.result{margin-top:16px;border-top:2px dashed var(--line);padding-top:12px}
+.result .big{font-family:var(--fh);font-size:1.6rem;font-weight:800;margin:0}
+.result .big.neg{color:var(--red)}
+.lesson{background:rgba(242,183,5,.16);border-left:4px solid var(--gold);padding:8px 12px;margin:10px 0 0;border-radius:0 8px 8px 0}
+.mis{list-style:none;padding:0;margin:8px 0 0}
+.mis li{display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-bottom:1px dotted var(--line)}
+.mis li:last-child{border-bottom:none}
+.mis .st{font-size:1.2rem;line-height:1.2;width:1.4em;flex:none;color:var(--mut)}
+.mis li.done .st{color:var(--goldd)}
+@media (prefers-color-scheme:dark){.mis li.done .st{color:var(--gold)}}
+.mis li.done span:last-child{text-decoration:line-through;text-decoration-color:var(--ok);text-decoration-thickness:2px}
+.count{font-family:var(--fh);font-size:1rem;color:var(--mut);font-weight:600}
+.link{background:none;border:none;color:var(--mut);text-decoration:underline;padding:0;font-size:.85rem;margin-top:8px}
+.qz{border:none;padding:0;margin:16px 0 0}
+.qz legend{font-weight:700;padding:0;margin-bottom:6px}
+.qopts{display:flex;flex-wrap:wrap;gap:8px}
+.qopts button{border:2px solid var(--line);background:var(--field);border-radius:10px;padding:8px 12px;text-align:left}
+.qopts button.ok{border-color:var(--ok);background:rgba(43,138,62,.15);font-weight:700}
+.qopts button.no{border-color:var(--red);text-decoration:line-through;opacity:.7}
+.fb{font-size:.92rem;margin:6px 0 0;min-height:1em}
+.fb.ok{color:var(--ok)}
+.fb.no{color:var(--red)}
+.gloss{display:grid;grid-template-columns:1fr 1fr;gap:4px 24px;margin-top:8px}
+@media(max-width:640px){.gloss{grid-template-columns:1fr}}
+.gloss details{border-bottom:1px dotted var(--line);padding:6px 0}
+.gloss summary{font-family:var(--fh);font-weight:700;font-size:1.1rem;cursor:pointer}
+.gloss p{margin:4px 0 6px;font-size:.95rem}
+#tip{border:2px solid var(--ink);border-radius:14px;padding:18px;max-width:min(360px,90vw);background:var(--card);color:var(--ink)}
+#tip::backdrop{background:rgba(10,20,40,.35)}
+#tip h3{font-size:1.4rem;margin-bottom:6px}
+#tip p{margin:0 0 12px}
+.btn{border:2px solid var(--ink);background:var(--ink);color:var(--paper);border-radius:10px;padding:8px 14px;font-weight:700}
+#toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translate(-50%,140%);background:var(--ink);color:var(--paper);padding:12px 18px;border-radius:12px;font-weight:700;max-width:90vw;transition:transform .3s;z-index:5;pointer-events:none}
+#toast.on{transform:translate(-50%,0)}
+footer{color:var(--mut);font-size:.88rem;max-width:70ch;margin-top:10px}
+@media (prefers-reduced-motion:reduce){.pop{animation:none}#toast,.sw input,.sw input::after{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="clock" role="region" aria-label="Calendario">
+ <span class="when" id="when" aria-live="polite"></span>
+ <span class="capv">Capitale: <b id="capNow"></b></span>
+ <button type="button" class="next" id="next">Passa un mese ▸</button>
+</div>
+<header>
+ <h1>Il barile dei soldi</h1>
+ <p class="intro">Ogni mese i soldi che ricevi riempiono un barile. Le spese lo svuotano a strati, e quello che resta in cima è il tuo risparmio. Con «Passa un mese» vivi i mesi uno alla volta: quello che avanza, o che manca, finisce nel capitale. Con il viaggio nel tempo scopri quanto diventa in 1, 10 o 30 anni.</p>
+ <div class="scen" id="scen" role="group" aria-label="Scegli da dove partire"></div>
+</header>
+
+<div class="main">
+ <div>
+  <section class="sheet" aria-labelledby="h-in">
+   <h2 id="h-in">💰 Quanto ricevi <button type="button" class="q" data-help="entrate" aria-label="Cosa sono le entrate?">?</button></h2>
+   <div class="top3">
+    <label><span id="incLbl">Entrate al mese (€)</span><input id="inc" type="number" min="0" step="1" inputmode="decimal"></label>
+    <label>Capitale (€)<input id="cap" type="number" step="1" inputmode="decimal"></label>
+    <label>Un lingotto vale<select id="unit"><option value="10">10 €</option><option value="50">50 €</option><option value="100">100 €</option><option value="500">500 €</option><option value="1000">1.000 €</option></select></label>
+   </div>
+  </section>
+
+  <section class="sheet" aria-labelledby="h-sp">
+   <h2 id="h-sp">🛒 Le tue spese</h2>
+   <p class="hint">Tocca l’etichetta per decidere se è un <button type="button" class="q" data-help="bisogno" aria-label="Cos’è un bisogno?">?</button> bisogno o un <button type="button" class="q" data-help="desiderio" aria-label="Cos’è un desiderio?">?</button> desiderio. Scrivi quanto spendi ogni mese.</p>
+   <div id="cats"></div>
+   <button type="button" class="add" id="addCat">+ Aggiungi una spesa</button>
+  </section>
+
+  <section class="sheet" aria-labelledby="h-db">
+   <h2 id="h-db">💳 Prestiti <button type="button" class="q" data-help="prestito" aria-label="Cos’è un prestito?">?</button><button type="button" class="q" data-help="interesse" aria-label="Cos’è l’interesse?">%</button></h2>
+   <p class="hint">Un prestito ti dà soldi subito, ma li restituisci a rate e con un extra: l’interesse.</p>
+   <div id="debts"></div>
+   <button type="button" class="add" id="addDebt">+ Aggiungi un prestito</button>
+  </section>
+
+  <section class="sheet" aria-labelledby="h-iv">
+   <h2 id="h-iv">🌱 Investimenti <button type="button" class="q" data-help="investimento" aria-label="Cos’è un investimento?">?</button><button type="button" class="q" data-help="rendimento" aria-label="Cos’è il rendimento?">%</button></h2>
+   <p class="hint">Metti da parte una somma ogni mese e lasciala crescere. Alla fine dei tuoi anni l’investimento si chiude e i soldi tornano in cassa.</p>
+   <div id="invs"></div>
+   <button type="button" class="add" id="addInv">+ Aggiungi un investimento</button>
+  </section>
+ </div>
+
+ <aside class="side">
+  <div class="board">
+   <svg class="barrel" viewBox="0 0 200 270" role="img" aria-labelledby="btitle">
+    <title id="btitle">Il barile: entrate e uscite di un mese</title>
+    <defs>
+     <clipPath id="clipB"><path d="M42 30Q8 135 42 245H158Q192 135 158 30Z"/></clipPath>
+     <pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="3" height="8" fill="#fff" opacity=".45"/></pattern>
+    </defs>
+    <g clip-path="url(#clipB)"><rect x="0" y="30" width="200" height="215" style="fill:var(--empty)"/><g id="fill"></g></g>
+    <path d="M42 30Q8 135 42 245H158Q192 135 158 30Z" fill="none" style="stroke:var(--ink)" stroke-width="4"/>
+    <ellipse cx="100" cy="30" rx="58" ry="10" style="fill:var(--card);stroke:var(--ink)" stroke-width="4"/>
+    <path d="M20 80Q100 98 180 80M12 137Q100 156 188 137M20 195Q100 213 180 195" fill="none" style="stroke:var(--ink)" stroke-width="3" opacity=".5"/>
+    <path d="M42 245Q100 262 158 245" fill="none" style="stroke:var(--ink)" stroke-width="4"/>
+    <g id="over"></g>
+   </svg>
+   <p class="status" id="status" aria-live="polite"></p>
+   <ul class="legend" id="legend"></ul>
+   <div class="split" id="split" aria-hidden="true"></div>
+   <p class="splitcap">Molti adulti seguono una regola semplice: circa metà per i bisogni, un terzo per i desideri e almeno un quinto da parte.</p>
+   <div id="diaryBox" hidden><h3 style="font-size:1.15rem;margin-top:16px">📒 Diario dei mesi</h3><ul class="diary" id="diary"></ul></div>
+  </div>
+ </aside>
+</div>
+
+<section class="sheet" aria-labelledby="h-tt">
+ <h2 id="h-tt">⏳ Viaggio nel tempo</h2>
+ <p class="hint">Guarda mese dopo mese cosa succede ai tuoi soldi. I lingotti d’oro sono i soldi in cassa, quelli d’argento i soldi investiti.</p>
+ <label for="yrs" style="margin-top:12px">Durata del viaggio: <b id="yrsLbl" style="color:var(--ink)"></b></label>
+ <input type="range" id="yrs" min="1" max="30" step="1">
+ <div class="opts">
+  <label class="sw"><input type="checkbox" id="infl"> Prezzi in aumento (inflazione 2% l’anno)</label><button type="button" class="q" data-help="inflazione" aria-label="Cos’è l’inflazione?">?</button>
+  <label class="sw"><input type="checkbox" id="tax"> Tasse sui guadagni (26%)</label><button type="button" class="q" data-help="tasse" aria-label="Cosa sono le tasse sui guadagni?">?</button>
+ </div>
+ <button type="button" class="go" id="go"></button>
+ <div class="stats" id="stats" aria-live="off"></div>
+ <div class="barskey"><span><i></i>oro: in cassa</span><span><i class="s"></i>argento: investito</span><button type="button" class="q" data-help="lingotto" aria-label="Come funzionano i lingotti?">?</button></div>
+ <div class="bars" id="bars"></div>
+ <p class="more" id="more"></p>
+ <ul class="log" id="log"></ul>
+ <div class="result" id="result" hidden aria-live="polite"></div>
+</section>
+
+<section class="sheet" aria-labelledby="h-ms">
+ <h2 id="h-ms">⭐ Missioni <span class="count" id="count"></span></h2>
+ <p class="hint">Completa le sfide cambiando i numeri e facendo viaggi nel tempo.</p>
+ <ul class="mis" id="mis"></ul>
+ <button type="button" class="link" id="resetMis">Azzera le missioni</button>
+</section>
+
+<section class="sheet" aria-labelledby="h-qz">
+ <h2 id="h-qz">🧠 Mettiti alla prova</h2>
+ <div id="quiz"></div>
+ <p class="fb" id="qscore" aria-live="polite"></p>
+ <button type="button" class="link" id="qreset">Rifai il quiz</button>
+</section>
+
+<section class="sheet" aria-labelledby="h-gl">
+ <h2 id="h-gl">📖 Le parole dei soldi</h2>
+ <div class="gloss" id="gloss"></div>
+</section>
+
+<footer>
+ <p><b>Per l’insegnante.</b> I numeri sono semplificati: rendimenti costanti e senza costi del fondo, tasse al 26% applicate solo alla chiusura dell’investimento (per i titoli di Stato sarebbero il 12,5%), inflazione fissa al 2% e nessun interesse sui soldi in cassa. I dati restano solo su questo dispositivo.</p>
+</footer>
+</div>
+
+<div id="tip" popover role="dialog" aria-labelledby="tipT"><h3 id="tipT"></h3><p id="tipP"></p><button type="button" class="btn" id="tipX">Ho capito</button></div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const KEY='barile-scuola-v1';
+const COLORS=['#e8590c','#2f9e44','#1c7ed6','#ae3ec9','#0ca678','#f08c00','#d6336c','#5c940d'];
+const DCOL=['#c92a2a','#862e9c','#a61e4d'];
+const ICOL=['#1971c2','#0b7285','#5f3dc4'];
+const GOLD='#f2b705';
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const eur=n=>{const r=Math.round((n||0)*100)/100;return new Intl.NumberFormat('it-IT',{style:'currency',currency:'EUR',minimumFractionDigits:Number.isInteger(r)?0:2,maximumFractionDigits:2}).format(r)};
+const reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const GLOSS={
+ entrate:['Entrate','Tutti i soldi che ricevi: la paghetta, uno stipendio, i soldi di un regalo.'],
+ bisogno:['Bisogno','Una spesa necessaria per vivere bene: il cibo, la casa, la scuola, le cure. È difficile rinunciarci.'],
+ desiderio:['Desiderio','Una cosa che vorresti ma di cui puoi fare a meno: un gioco nuovo, un’uscita, un abbonamento. Va benissimo averne: l’importante è sceglierli.'],
+ risparmio:['Risparmio','La parte dei soldi che non spendi e metti da parte per il futuro o per qualcosa di importante.'],
+ prestito:['Prestito','Soldi che qualcuno, di solito una banca, ti dà subito. Tu li restituisci un po’ alla volta, con una rata ogni mese.'],
+ interesse:['Interesse','Il prezzo di un prestito, in percentuale. Con il 10% l’anno paghi circa 10 € in più all’anno per ogni 100 € che devi ancora restituire.'],
+ composto:['Interesse composto','Quando i guadagni di un investimento restano investiti e cominciano a guadagnare anche loro. Come una palla di neve che rotolando diventa sempre più grande.'],
+ investimento:['Investimento','Mettere i soldi in qualcosa che può farli crescere, per esempio un fondo con le azioni di tante aziende. Qui versi una somma ogni mese, come in un piano di accumulo (PAC). Più anni lo lasci, più conta l’interesse composto.'],
+ rendimento:['Rendimento','Quanto cresce un investimento in un anno, in percentuale. È una previsione, non una promessa: può andare meglio, peggio o anche in perdita.'],
+ inflazione:['Inflazione','L’aumento dei prezzi nel tempo. Se una pizza oggi costa 8 € e l’inflazione è al 2%, tra un anno costerà circa 8,16 €. I soldi fermi comprano sempre meno.'],
+ tasse:['Tasse sui guadagni','In Italia, quando guadagni da un investimento, una parte del guadagno va allo Stato: di solito il 26%. Si paga solo sul guadagno, non sui soldi che hai versato.'],
+ bancarotta:['Bancarotta','Quando i soldi finiscono e non riesci più a pagare spese e rate. Nel simulatore succede quando la cassa va sotto zero.'],
+ lingotto:['Lingotti','Un modo per vedere i soldi. Ogni lingotto d’oro è una certa somma in cassa, ogni lingotto d’argento la stessa somma investita. Scegli tu quanto vale un lingotto.']
+};
+
+const SCEN={
+ paghetta:{t:'🎒 La mia paghetta',s:'60 € al mese',inc:60,cap:20,unit:50,yrs:5,cats:[['Merenda',15,'b'],['Ricarica telefono',10,'b'],['Videogiochi',20,'d'],['Uscite con gli amici',10,'d']],debt:{p:200,m:10,t:10},inv:{p:10,r:5,y:10}},
+ grande:{t:'🧑‍💼 Da grande',s:'Stipendio di 1.500 €',inc:1500,cap:0,unit:1000,yrs:10,cats:[['Affitto',550,'b'],['Spesa',300,'b'],['Bollette',120,'b'],['Trasporti',80,'b'],['Uscite e svago',220,'d'],['Shopping',180,'d'],['Abbonamenti streaming',60,'d']],debt:{p:5000,m:36,t:9},inv:{p:100,r:5,y:20}},
+ libero:{t:'✏️ Foglio bianco',s:'Inventa tu i numeri',inc:0,cap:0,unit:100,yrs:5,cats:[],debt:{p:500,m:12,t:8},inv:{p:20,r:5,y:10}}
+};
+function fresh(k,stars){const sc=SCEN[k];return{scen:k,inc:sc.inc,cap:sc.cap,unit:sc.unit,yrs:sc.yrs,infl:false,tax:true,cats:sc.cats.map((c,i)=>({n:c[0],a:c[1],k:c[2],c:COLORS[i%COLORS.length]})),debts:[],invs:[],stars:stars||{},ym:nowYM(),diary:[],streak:0}}
+let S=null;
+try{S=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){}
+if(!S||!Array.isArray(S.cats)||!SCEN[S.scen])S=fresh('paghetta');
+S.debts=S.debts||[];S.invs=S.invs||[];S.stars=S.stars||{};if(typeof S.ym!=='number')S.ym=nowYM();S.diary=S.diary||[];S.streak=S.streak||0;
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+
+const nm=d=>Math.max(1,Math.round(+d.m||0));
+const mr=t=>Math.pow(1+Math.max(-99,+t||0)/100,1/12)-1;
+const rata=d=>{const P=+d.p||0,n=nm(d),i=mr(d.t);return i>0?P*i/(1-Math.pow(1+i,-n)):P/n};
+const iN=v=>Math.max(1,Math.round((+v.y||0)*12));
+const rem=v=>Math.max(1,iN(v)-(v.el||0));
+const fv=v=>{const i=mr(v.r),n=rem(v),p=+v.p||0,v0=+v.val||0,g=Math.pow(1+i,n);return v0*g+(Math.abs(i)<1e-12?p*n:p*(g-1)/i)};
+const bal=(d,k)=>{const P=+d.p||0,i=mr(d.t),r=rata(d);return i>0?P*Math.pow(1+i,k)-r*(Math.pow(1+i,k)-1)/i:P-r*k};
+const sumC=k=>S.cats.filter(c=>!k||c.k===k).reduce((s,c)=>s+(+c.a||0),0);
+const drem=d=>nm(d)-(d.el||0);
+const debtM=m=>S.debts.reduce((s,d)=>s+(m<=drem(d)?rata(d):0),0);
+const invM=m=>S.invs.reduce((s,v)=>s+(m<=rem(v)?(+v.p||0):0),0);
+const outM=m=>sumC()+debtM(m)+invM(m);
+const items=()=>S.cats.map(c=>({n:c.n||'Spesa',a:+c.a||0,c:c.c,k:c.k}))
+ .concat(S.debts.map(d=>({n:'Rata: '+(d.n||'Prestito'),a:rata(d),c:d.c,k:'p'})))
+ .concat(S.invs.map(v=>({n:'Investo: '+(v.n||'Investimento'),a:+v.p||0,c:v.c,k:'i'})));
+const KIND={b:'bisogno',d:'desiderio',p:'prestito',i:'investimento'};
+function nowYM(){const d=new Date();return d.getFullYear()*12+d.getMonth()}
+function fmtYM(i){return new Intl.DateTimeFormat('it-IT',{month:'long',year:'numeric'}).format(new Date(Math.floor(i/12),i%12,1))}
+function renderClock(){$('when').textContent=fmtYM(S.ym);const c=$('capNow');c.textContent=eur(S.cap);c.className=S.cap<0?'neg':''}
+function renderDiary(){const b=$('diaryBox');if(!S.diary.length){b.hidden=true;return}b.hidden=false;$('diary').innerHTML=S.diary.slice(0,6).map(x=>`<li><span>${esc(x.m)}${x.e&&x.e.length?'<br><span class="tag" style="margin:0">'+x.e.map(esc).join('<br>')+'</span>':''}</span><span class="${x.d>=0?'pos':'neg'}">${x.d>=0?'+':''}${eur(x.d)}</span></li>`).join('')}
+function passMonth(){
+ const label=fmtYM(S.ym),ev=[];
+ let delta=S.inc-sumC();
+ S.debts.forEach(d=>{if(drem(d)>0){delta-=rata(d);d.el=(d.el||0)+1;if(drem(d)<=0)ev.push('✅ Hai finito di pagare '+(d.n||'il prestito'))}});
+ S.invs.forEach(v=>{const p=+v.p||0;v.val=(+v.val||0)*(1+mr(v.r))+p;v.cv=(+v.cv||0)+p;v.el=(v.el||0)+1;delta-=p});
+ let back=0;
+ S.invs=S.invs.filter(v=>{if(v.el<iN(v))return true;const g=v.val-v.cv,t=S.tax&&g>0?g*.26:0;back+=v.val-t;ev.push('🏁 '+(v.n||'Investimento')+' si è chiuso: incassi '+eur(v.val-t));return false});
+ S.debts=S.debts.filter(d=>drem(d)>0);
+ S.cap=Math.round((S.cap+delta+back)*100)/100;
+ S.diary.unshift({m:label,d:Math.round(delta*100)/100,e:ev});S.diary=S.diary.slice(0,24);
+ S.ym++;
+ S.streak=S.cap>=0?S.streak+1:0;
+ syncTop();renderDebts();renderInvs();update(false);
+ ev.forEach(toast);
+ if(S.streak>=12)award('m8');
+}
+
+function renderScen(){
+ $('scen').innerHTML=Object.entries(SCEN).map(([k,v])=>`<button type="button" class="sc" data-s="${k}" aria-pressed="${S.scen===k}">${v.t}<small>${v.s}</small></button>`).join('');
+}
+$('scen').onclick=e=>{const b=e.target.closest('.sc');if(!b)return;S=fresh(b.dataset.s,S.stars);syncTop();renderAll();update(false)};
+
+function syncTop(){
+ $('inc').value=S.inc;$('cap').value=S.cap;$('unit').value=String(S.unit);$('yrs').value=S.yrs;$('infl').checked=!!S.infl;$('tax').checked=!!S.tax;
+ $('incLbl').textContent=S.scen==='paghetta'?'Paghetta al mese (€)':'Entrate al mese (€)';
+ renderScen();
+}
+
+function renderCats(){
+ const box=$('cats');box.innerHTML='';
+ if(!S.cats.length){box.innerHTML='<p class="empty">Ancora nessuna spesa. Aggiungine una: anche le cose piccole contano.</p>';return}
+ S.cats.forEach((c,i)=>{
+  const r=document.createElement('div');r.className='row';
+  r.innerHTML='<input type="color" aria-label="Colore"><input type="text" class="nm" aria-label="Nome della spesa" placeholder="Es. merenda"><button type="button" class="kind"></button><input type="number" class="am" min="0" step="1" inputmode="decimal" aria-label="Euro al mese"><button type="button" class="del">✕</button>';
+  const [col,nmI,kd,am,del]=r.children;
+  col.value=c.c;nmI.value=c.n;am.value=c.a;
+  const setK=()=>{kd.dataset.k=c.k;kd.textContent=c.k==='b'?'Bisogno':'Desiderio';kd.setAttribute('aria-label',(c.k==='b'?'Bisogno':'Desiderio')+', tocca per cambiare')};setK();
+  del.setAttribute('aria-label','Elimina '+(c.n||'spesa'));
+  col.oninput=()=>{c.c=col.value;update(true)};
+  nmI.oninput=()=>{c.n=nmI.value;update(true)};
+  kd.onclick=()=>{c.k=c.k==='b'?'d':'b';setK();update(true)};
+  am.oninput=()=>{c.a=Math.max(0,parseFloat(am.value)||0);update(true)};
+  del.onclick=()=>{S.cats.splice(i,1);renderCats();update(true)};
+  box.appendChild(r);
+ });
+}
+$('addCat').onclick=()=>{S.cats.push({n:'',a:0,k:'d',c:COLORS[S.cats.length%COLORS.length]});renderCats();update(true);const ins=$('cats').querySelectorAll('.nm');ins[ins.length-1].focus()};
+
+function renderDebts(){
+ const box=$('debts');box.innerHTML='';
+ S.debts.forEach((d,i)=>{
+  const r=document.createElement('div');r.className='sub';
+  r.innerHTML='<div class="subhead"><input type="color" aria-label="Colore"><input type="text" aria-label="Nome del prestito" placeholder="Per cosa?"><button type="button" class="del" aria-label="Elimina prestito">✕</button></div><div class="f3"><label>Quanto ti prestano (€)<input type="number" min="0" step="10" inputmode="decimal"></label><label>Mesi per restituirlo<input type="number" min="1" step="1" inputmode="numeric"></label><label>Interesse annuo (%)<input type="number" min="0" step="0.5" inputmode="decimal"></label></div><p class="calc"></p>';
+  const [col,nmI,p,m,t]=r.querySelectorAll('input'),calc=r.querySelector('.calc');
+  col.value=d.c;nmI.value=d.n;p.value=d.p;m.value=d.m;t.value=d.t;
+  const upd=()=>{const R=rata(d),T=R*nm(d);calc.innerHTML='Rata: <b>'+eur(R)+'</b> al mese per '+nm(d)+' mesi. Restituisci in tutto <b>'+eur(T)+'</b>, cioè <b>'+eur(T-(+d.p||0))+'</b> in più di quanto ti hanno prestato.'+((d.el||0)>0?' Hai già pagato '+d.el+' rate: ne mancano '+Math.max(0,drem(d))+' e devi ancora <b>'+eur(Math.max(0,bal(d,d.el)))+'</b>.':'')};upd();
+  col.oninput=()=>{d.c=col.value;update(true)};
+  nmI.oninput=()=>{d.n=nmI.value;update(true)};
+  p.oninput=()=>{d.p=Math.max(0,parseFloat(p.value)||0);upd();update(true)};
+  m.oninput=()=>{d.m=Math.max(0,parseFloat(m.value)||0);upd();update(true)};
+  t.oninput=()=>{d.t=Math.max(0,parseFloat(t.value)||0);upd();update(true)};
+  r.querySelector('.del').onclick=()=>{S.debts.splice(i,1);renderDebts();update(true)};
+  box.appendChild(r);
+ });
+}
+$('addDebt').onclick=()=>{const x=SCEN[S.scen].debt;S.debts.push({n:'Prestito',p:x.p,m:x.m,t:x.t,c:DCOL[S.debts.length%DCOL.length]});renderDebts();update(true)};
+
+function renderInvs(){
+ const box=$('invs');box.innerHTML='';
+ S.invs.forEach((v,i)=>{
+  const r=document.createElement('div');r.className='sub';
+  r.innerHTML='<div class="subhead"><input type="color" aria-label="Colore"><input type="text" aria-label="Nome dell’investimento" placeholder="Es. il mio futuro"><button type="button" class="del" aria-label="Elimina investimento">✕</button></div><div class="f3"><label>Quanto metti al mese (€)<input type="number" min="0" step="1" inputmode="decimal"></label><label>Quanto cresce all’anno (%)<input type="number" step="0.5" inputmode="decimal"></label><label>Per quanti anni<input type="number" min="1" step="1" inputmode="numeric"></label></div><p class="calc"></p>';
+  const [col,nmI,p,rr,y]=r.querySelectorAll('input'),calc=r.querySelector('.calc');
+  col.value=v.c;nmI.value=v.n;p.value=v.p;rr.value=v.r;y.value=v.y;
+  const upd=()=>{const end=fv(v),el=v.el||0;calc.innerHTML=(el>0?'Finora hai versato <b>'+eur(v.cv||0)+'</b> e oggi vale <b>'+eur(v.val||0)+'</b>. Mancano '+rem(v)+' mesi. ':'Verserai in tutto <b>'+eur((+v.p||0)*iN(v))+'</b>. ')+'Se cresce come previsto, alla fine avrai circa <b>'+eur(end)+'</b> prima delle tasse.'};upd();
+  col.oninput=()=>{v.c=col.value;update(true)};
+  nmI.oninput=()=>{v.n=nmI.value;update(true)};
+  p.oninput=()=>{v.p=Math.max(0,parseFloat(p.value)||0);upd();update(true)};
+  rr.oninput=()=>{v.r=parseFloat(rr.value)||0;upd();update(true)};
+  y.oninput=()=>{v.y=Math.max(0,parseFloat(y.value)||0);upd();update(true)};
+  r.querySelector('.del').onclick=()=>{S.invs.splice(i,1);renderInvs();update(true)};
+  box.appendChild(r);
+ });
+}
+$('addInv').onclick=()=>{const x=SCEN[S.scen].inv;S.invs.push({n:'Il mio investimento',p:x.p,r:x.r,y:x.y,c:ICOL[S.invs.length%ICOL.length]});renderInvs();update(true)};
+
+function drawBarrel(){
+ const tot=outM(1),left=S.inc-tot,max=Math.max(S.inc,tot,1),H=215,base=245;
+ let y=base,h='';
+ items().forEach(k=>{if(k.a<=0)return;const hh=H*k.a/max;y-=hh;h+=`<rect x="0" y="${y}" width="200" height="${hh+.4}" fill="${esc(k.c)}"/>`;if(k.k==='d')h+=`<rect x="0" y="${y}" width="200" height="${hh}" fill="url(#hatch)"/>`});
+ if(left>0){const hh=H*left/max;y-=hh;h+=`<rect x="0" y="${y}" width="200" height="${hh}" fill="${GOLD}"/><ellipse cx="100" cy="${y+1}" rx="80" ry="3" fill="#fff" opacity=".35"/>`}
+ $('fill').innerHTML=h;
+ let o='';
+ if(tot>S.inc&&tot>0){const ly=base-H*S.inc/max;o=`<line x1="12" x2="188" y1="${ly}" y2="${ly}" style="stroke:var(--red)" stroke-width="3" stroke-dasharray="7 5"/><text x="100" y="${Math.max(44,ly-6)}" text-anchor="middle" class="lineLbl">fin qui arrivano le entrate</text>`}
+ $('over').innerHTML=o;
+ const st=$('status');
+ if(S.inc<=0&&tot<=0){st.className='status';st.textContent='Scrivi quanto ricevi al mese per riempire il barile.'}
+ else if(left>=0){st.className='status';st.textContent='Ti restano '+eur(left)+' al mese'+(S.inc>0?' ('+Math.round(left/S.inc*100)+'%)':'')}
+ else{st.className='status neg';st.textContent='⚠️ Spendi '+eur(-left)+' più di quanto ricevi!'}
+ const pct=a=>S.inc>0?' · '+Math.round(a/S.inc*100)+'%':'';
+ $('legend').innerHTML=items().map(k=>`<li><span><span class="dot${k.k==='d'?' h':''}" style="background-color:${esc(k.c)}"></span>${esc(k.n)}<span class="tag">${KIND[k.k]}</span></span><span>${eur(k.a)}${pct(k.a)}</span></li>`).join('')+
+  `<li><span><span class="dot" style="background:${GOLD}"></span><b>Risparmio</b></span><span><b>${eur(Math.max(0,left))}</b>${pct(Math.max(0,left))}</span></li>`;
+ const parts=[[sumC('b'),'var(--ink)',''],[sumC('d'),'#f08c00','h'],[debtM(1),'#c92a2a',''],[invM(1),'#1971c2',''],[Math.max(0,left),GOLD,'']];
+ $('split').innerHTML=parts.filter(p=>p[0]>0).map(p=>`<span style="width:${p[0]/max*100}%;background:${p[1]}${p[2]?';background-image:repeating-linear-gradient(45deg,transparent 0 3px,rgba(255,255,255,.5) 3px 5px)':''}"></span>`).join('');
+}
+
+const stat=(k,v,c)=>`<div class="stat ${c||''}"><span>${k}</span><b>${v}</b></div>`;
+let timer=null;
+function resetSim(){
+ clearInterval(timer);timer=null;
+ $('go').textContent='▶ Parti per il viaggio';
+ $('bars').innerHTML='';$('more').textContent='';$('log').innerHTML='';$('result').hidden=true;$('result').innerHTML='';
+ const l=S.inc-outM(1);
+ $('stats').innerHTML=stat('Capitale',eur(S.cap),S.cap<0?'neg':'')+stat('Ogni mese metti da parte',eur(l),l<0?'neg':'')+stat('Un lingotto vale',eur(S.unit));
+ $('yrsLbl').textContent=S.yrs+(S.yrs==1?' anno':' anni');
+}
+function drawBars(g,sv,pg,ps){
+ const GM=200,SM=120;let h='';
+ for(let k=0;k<Math.min(g,GM);k++)h+='<i'+(k>=pg?' class="pop"':'')+'></i>';
+ for(let k=0;k<Math.min(sv,SM);k++)h+='<i class="s'+(k>=ps?' pop':'')+'"></i>';
+ $('bars').innerHTML=h;
+ const ex=[];if(g>GM)ex.push('altri '+(g-GM)+' lingotti d’oro');if(sv>SM)ex.push('altri '+(sv-SM)+' lingotti d’argento');
+ $('more').textContent=ex.length?'Non c’è spazio per tutti: ci sono '+ex.join(' e ')+'.':'';
+}
+function run(){
+ if(timer){resetSim();return}
+ resetSim();
+ const M=S.yrs*12,unit=Math.max(1,+S.unit||1),infl=!!S.infl,tax=!!S.tax,spend=sumC(),inc=S.inc;
+ let m=0,cash=S.cap,interest=0,taxes=0,gains=0,maxGold=0,bk=false,pg=0,ps=0;
+ const ds=S.debts.filter(d=>drem(d)>0).map(d=>({b:bal(d,d.el||0),i:mr(d.t),r:rata(d),n:drem(d),name:d.n||'Prestito',int:0}));
+ const st=S.invs.map(v=>({v:+v.val||0,c:+v.cv||0,done:false,early:false,n:rem(v),full:iN(v),i:mr(v.r),p:+v.p||0,name:v.n||'Investimento'}));
+ const log=$('log');
+ const note=(ic,html)=>{const li=document.createElement('li');li.innerHTML='<span aria-hidden="true">'+ic+'</span><span>'+html+'</span>';log.appendChild(li)};
+ const when=x=>fmtYM(S.ym+x-1);
+ const sell=(s,early)=>{const g=s.v-s.c,t=tax&&g>0?g*.26:0;taxes+=t;gains+=g-t;cash+=s.v-t;s.done=true;s.early=early;
+  note(early?'🚨':'🏁',early
+   ?`I soldi in cassa sono finiti: hai dovuto vendere <b>${esc(s.name)}</b> in anticipo (${when(m)}). Valeva ${eur(s.v)} e ne avevi versati ${eur(s.c)}.`
+   :`<b>${esc(s.name)}</b> si è chiuso (${when(m)}). Hai versato ${eur(s.c)} e incassato ${eur(s.v-t)}${t>0?', dopo '+eur(t)+' di tasse':''}. ${g-t>=0?'Guadagno':'Perdita'}: <b>${eur(g-t)}</b>.`)};
+ const step=()=>{
+  m++;
+  cash+=inc-spend;
+  ds.forEach(d=>{if(m>d.n)return;const it=d.b*d.i;d.int+=it;interest+=it;d.b+=it-d.r;cash-=d.r;
+   if(m===d.n)note('✅',`Hai finito di pagare <b>${esc(d.name)}</b> (${when(m)}). Di soli interessi hai pagato ${eur(d.int)}.`)});
+  st.forEach(s=>{if(s.done)return;s.v=s.v*(1+s.i)+s.p;s.c+=s.p;cash-=s.p;if(m===s.n)sell(s,false)});
+  if(cash<-.005)st.filter(s=>!s.done).sort((a,b)=>b.v-a.v).forEach(s=>{if(cash<-.005)sell(s,true)});
+  if(cash<-.005)bk=true;
+  const inv=st.reduce((a,s)=>a+(s.done?0:s.v),0),g=Math.floor(Math.max(0,cash)/unit),sv=Math.floor(inv/unit);
+  maxGold=Math.max(maxGold,g);
+  drawBars(g,sv,pg,ps);pg=g;ps=sv;
+  const real=infl?Math.pow(1.02,-m/12):1;
+  $('stats').innerHTML=stat('Tempo',when(m))+stat('In cassa',eur(cash),cash<0?'neg':'')+(st.length?stat('Investito',eur(inv)):'')+(infl?stat('Vale come oggi',eur((cash+inv)*real)):'');
+  return m>=M||bk;
+ };
+ const finish=()=>{
+  clearInterval(timer);timer=null;$('go').textContent='↻ Rifai il viaggio';
+  const inv=st.reduce((a,s)=>a+(s.done?0:s.v),0),tot=cash+inv,real=infl?Math.pow(1.02,-m/12):1;
+  st.filter(s=>!s.done).forEach(s=>note('⏳',`<b>${esc(s.name)}</b> non è ancora finito: oggi vale ${eur(s.v)} e ne hai versati ${eur(s.c)}.`));
+  let h=bk
+   ?`<p class="big neg">💥 Bancarotta! (${when(m)})</p><p>Le uscite erano più grandi delle entrate e i soldi da parte sono finiti. Prova a togliere qualche desiderio, a chiedere un prestito più piccolo o a restituirlo in più mesi.</p>`
+   :`<p class="big">Dopo ${S.yrs} ${S.yrs==1?'anno':'anni'} hai ${eur(tot)}</p>`;
+  h+='<div class="stats">'+stat('In cassa',eur(cash),cash<0?'neg':'')+(inv>0?stat('Investimenti ancora aperti',eur(inv)):'')+(ds.length?stat('Interessi pagati',eur(interest),'neg'):'')+(st.length?stat('Guadagno dagli investimenti',eur(gains),gains<0?'neg':''):'')+(taxes>0?stat('Tasse sui guadagni',eur(taxes)):'')+'</div>';
+  const L=[];
+  if(ds.length&&interest>0)L.push(`I prestiti ti sono costati ${eur(interest)} in più: è il prezzo per avere i soldi subito invece di aspettare.`);
+  if(gains>0)L.push(`Gli investimenti hanno aggiunto ${eur(gains)} ai soldi che avevi versato. Più anni li lasci, più l’interesse composto lavora per te.`);
+  if(infl&&!bk&&tot>0)L.push(`Con i prezzi che salgono, i tuoi ${eur(tot)} potranno comprare quanto ${eur(tot*real)} di oggi.`);
+  if(!bk&&!st.length&&tot>0)L.push('Prova ad aggiungere un investimento e a fare un viaggio di 20 anni: guarda come cambia il risultato.');
+  if(!bk&&inc-outM(1)<=0&&S.cap<=0&&!st.length)L.push('Senza risparmio mensile il barile non si riempie mai. Prova a ridurre un desiderio.');
+  h+=L.map(t=>`<p class="lesson">${t}</p>`).join('');
+  $('result').innerHTML=h;$('result').hidden=false;
+  if(maxGold>=1)award('m2');
+  if(ds.length)award('m3');
+  if(st.some(s=>s.done&&!s.early&&s.full>=120))award('m4');
+  if(infl&&S.yrs>=10&&!bk)award('m5');
+ };
+ if(reduce){while(!step());finish();return}
+ $('go').textContent='■ Ferma il viaggio';
+ timer=setInterval(()=>{if(step())finish()},Math.max(15,Math.min(220,Math.round(7000/M))));
+}
+$('go').onclick=run;
+
+const MIS=[
+ ['m1','Risparmia almeno il 10% di quello che ricevi ogni mese'],
+ ['m6','Tieni i desideri sotto il 30% delle entrate, senza andare in rosso'],
+ ['m2','Conquista il tuo primo lingotto d’oro nel viaggio nel tempo'],
+ ['m3','Fai un viaggio nel tempo con un prestito e scopri quanto costa'],
+ ['m4','Porta fino alla fine un investimento di almeno 10 anni'],
+ ['m5','Viaggia 10 anni o più con l’inflazione accesa, senza bancarotta'],
+ ['m8','Fai passare 12 mesi di fila senza che il capitale vada sotto zero'],
+ ['m7','Rispondi a tutte le domande del quiz al primo colpo']
+];
+function renderMissions(){
+ $('mis').innerHTML=MIS.map(([id,t])=>`<li class="${S.stars[id]?'done':''}"><span class="st" aria-hidden="true">${S.stars[id]?'★':'☆'}</span><span>${t}${S.stars[id]?'<span class="tag">(fatto)</span>':''}</span></li>`).join('');
+ $('count').textContent=MIS.filter(x=>S.stars[x[0]]).length+' su '+MIS.length;
+}
+const tq=[];let tbusy=false;
+function toast(s){if(tq.length<3)tq.push(s);if(!tbusy)nextToast()}
+function nextToast(){const t=$('toast'),s=tq.shift();if(!s){tbusy=false;t.classList.remove('on');return}tbusy=true;t.textContent=s;t.classList.add('on');setTimeout(nextToast,3200)}
+function award(id){if(S.stars[id])return;S.stars[id]=1;save();renderMissions();const x=MIS.find(z=>z[0]===id);toast('⭐ Missione completata: '+x[1].charAt(0).toLowerCase()+x[1].slice(1))}
+$('resetMis').onclick=()=>{S.stars={};save();renderMissions()};
+function checkLive(){
+ const left=S.inc-outM(1);
+ if(S.inc>0&&left>=S.inc*.1)award('m1');
+ if(S.inc>0&&left>=0&&sumC('d')>0&&sumC('d')<=S.inc*.3)award('m6');
+}
+
+const QUIZ=[
+ {q:'Quale di queste cose è un bisogno?',o:['Il cibo per la cena','L’ultimo videogioco uscito','Le scarpe di marca'],a:0,w:'Un bisogno è qualcosa di necessario per vivere bene: mangiare, una casa, curarsi. Gli altri sono desideri: belli, ma se ne può fare a meno.'},
+ {q:'Ti prestano 1.000 € con un interesse. Quanto dovrai restituire?',o:['Meno di 1.000 €','Esattamente 1.000 €','Più di 1.000 €'],a:2,w:'L’interesse è il prezzo del prestito: restituisci quello che ti hanno dato più un extra.'},
+ {q:'Metti da parte 10 € al mese, senza interessi. Quanto hai dopo un anno?',o:['100 €','120 €','150 €'],a:1,w:'10 € per 12 mesi fa 120 €. Piccole somme, ripetute, diventano grandi.'},
+ {q:'Che cos’è l’inflazione?',o:['Una tassa sulla paghetta','L’aumento dei prezzi nel tempo','Un tipo di salvadanaio'],a:1,w:'Se i prezzi salgono, con gli stessi soldi compri meno cose. Per questo i soldi fermi perdono valore.'},
+ {q:'Perché conviene iniziare a investire presto?',o:['Perché le banche regalano soldi ai ragazzi','Perché da giovani non si rischia nulla','Perché i guadagni producono altri guadagni'],a:2,w:'È l’interesse composto: anche i guadagni cominciano a guadagnare. Più anni passano, più l’effetto è forte.'},
+ {q:'Un investimento può perdere valore?',o:['Sì, il guadagno non è garantito','No, cresce sempre'],a:0,w:'Gli investimenti salgono e scendono. Il rendimento che scrivi nel simulatore è solo una previsione.'}
+];
+let qs;
+function renderQuiz(){
+ qs=QUIZ.map(()=>({done:false,first:null}));
+ $('quiz').innerHTML=QUIZ.map((x,i)=>`<fieldset class="qz"><legend>${i+1}. ${x.q}</legend><div class="qopts">${x.o.map((o,j)=>`<button type="button" data-q="${i}" data-o="${j}">${o}</button>`).join('')}</div><p class="fb" id="fb${i}"></p></fieldset>`).join('');
+ $('qscore').textContent='';$('qscore').className='fb';
+}
+$('quiz').onclick=e=>{
+ const b=e.target.closest('button[data-q]');if(!b)return;
+ const i=+b.dataset.q,j=+b.dataset.o,s=qs[i],x=QUIZ[i];if(s.done||b.disabled)return;
+ const ok=j===x.a;if(s.first===null)s.first=ok;
+ const fb=$('fb'+i);
+ if(ok){s.done=true;b.classList.add('ok');fb.className='fb ok';fb.textContent='Giusto! '+x.w;b.parentNode.querySelectorAll('button').forEach(z=>z.disabled=true)}
+ else{b.classList.add('no');b.disabled=true;fb.className='fb no';fb.textContent='Non proprio, prova un’altra risposta.'}
+ if(qs.every(z=>z.done)){const n=qs.filter(z=>z.first).length;$('qscore').className='fb'+(n===QUIZ.length?' ok':'');$('qscore').textContent=n===QUIZ.length?'Perfetto: tutte giuste al primo colpo!':'Hai risposto giusto al primo colpo a '+n+' domande su '+QUIZ.length+'. Rifai il quiz per fare punteggio pieno.';if(n===QUIZ.length)award('m7')}
+};
+$('qreset').onclick=renderQuiz;
+
+$('gloss').innerHTML=Object.entries(GLOSS).map(([k,[t,d]])=>`<details id="g-${k}"><summary>${t}</summary><p>${d}</p></details>`).join('');
+const tip=$('tip');
+document.addEventListener('click',e=>{
+ const b=e.target.closest('[data-help]');if(!b)return;
+ const g=GLOSS[b.dataset.help];if(!g)return;
+ if(typeof tip.showPopover==='function'){$('tipT').textContent=g[0];$('tipP').textContent=g[1];try{tip.showPopover()}catch(_){}}
+ else{const d=$('g-'+b.dataset.help);d.open=true;d.scrollIntoView({behavior:reduce?'auto':'smooth',block:'center'})}
+});
+$('tipX').onclick=()=>{try{tip.hidePopover()}catch(_){}};
+
+$('inc').oninput=e=>{S.inc=Math.max(0,parseFloat(e.target.value)||0);update(true)};
+$('cap').oninput=e=>{S.cap=parseFloat(e.target.value)||0;update(true)};
+$('next').onclick=passMonth;
+$('unit').onchange=e=>{S.unit=+e.target.value;update(true)};
+$('yrs').oninput=e=>{S.yrs=+e.target.value;resetSim();save()};
+$('infl').onchange=e=>{S.infl=e.target.checked;resetSim();save()};
+$('tax').onchange=e=>{S.tax=e.target.checked;resetSim();save()};
+
+function renderAll(){renderCats();renderDebts();renderInvs();renderMissions()}
+function update(user){drawBarrel();resetSim();renderClock();renderDiary();if(user)checkLive();save()}
+syncTop();renderAll();renderQuiz();update(false);
+</script>
+</body>
+</html>
